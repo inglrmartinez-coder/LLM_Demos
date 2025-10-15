@@ -4,6 +4,7 @@ from datetime import datetime as dt
 import sqlite3, json, pandas as pd,requests
 from sqlalchemy import create_engine,text
 from bs4 import BeautifulSoup
+import asyncio
 
 
 class Config:
@@ -196,6 +197,25 @@ tools_dict = {"database_query": database_query,
               "read_webpage": read_webpage}
 
 
+def stream_call_llm(message,model):
+    state = {'messages': []} 
+    state["messages"].append(
+            {"role":"user",
+            "content":message})
+    if model == "qwen":
+        md = Config.MODEL_NAME
+    elif model == "ollama":
+        md = "llama3.2"
+    
+    print(state)
+    stream_data = client.chat.completions.create(model=md,
+                                                 messages=state["messages"],
+                                                 tools=tools,stream=True)
+    response = ""
+    for st in stream_data:
+        response += st.choices[0].delta.content if hasattr(st.choices[0].delta,"content") else ""
+        yield response
+
 
 def call_llm(messages,stream_mode=False):
     if stream_mode:
@@ -265,8 +285,13 @@ def test_tool_call():
     print("Final response from the LLM: ",follow_up.choices[0].message.content)
 
 
+#asyncio.run(stream_call_llm("hi"))
+
 if __name__ == "__main__":
     #test_tool_call()
+    
+
+    #es = stream_call_llm("test message")
     state = {'messages': []} #start the state with an empty list of messages
     #example of running the graph
     print("Type your question:")

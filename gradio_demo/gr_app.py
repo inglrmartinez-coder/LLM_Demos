@@ -1,4 +1,5 @@
 import gradio as gr
+from  OpenAI_Qwen.opeai_conn import stream_call_llm
 
 def fn_shout(text:str) -> str:
     return text.upper()
@@ -14,12 +15,13 @@ function refresh(){
 }
 """
 
-
+#uses several inputs
 gr.Interface(
-    fn=fn_shout,
+    fn=stream_call_llm,
     #inputs="textbox",
-    inputs=[gr.Textbox(label="Your message",lines=6)],
-    outputs="textbox",
+    inputs=[gr.Textbox(label="Your message",lines=5), 
+            gr.Dropdown(["ollama","qwen"],value="qwen",label="select a model")],
+    outputs=[gr.Markdown(label="response from llm")],
     title="Shout Demo", 
     flagging_mode="never",
     js=force_dark_mode
