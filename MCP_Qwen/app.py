@@ -3,6 +3,7 @@ from fastmcp import Client
 from openai import OpenAI
 import json, asyncio, enum
 
+
 # Define your enums here
 class CallType(enum.Enum):    
     tool = "function"   
@@ -158,9 +159,7 @@ async def call_llm(messages, stream_mode=False):
                                                messages=messages,
                                                tools=tools,
                                                tool_choice="auto")
-        if not response.choices[0].message.tool_calls:
-            #return {"messages": messages + [{"role": "assistant", "content": response.choices[0].message.content}]}
-            #return messages.append({"role": "assistant", "content": response.choices[0].message.content})
+        if not response.choices[0].message.tool_calls:            
             return response.choices[0].message.content
         else:
             tool_calls = response.choices[0].message.tool_calls
@@ -170,26 +169,16 @@ async def call_llm(messages, stream_mode=False):
                     arguments = json.loads(tool_call.function.arguments)
                     # Execute the tool manually
                     result = await route_tool_call(function_name, arguments)
-                if result["type"] == CallType.prompt:                    
-                    #messages.append({"role": "user", "content": result["result"]})
+                if result["type"] == CallType.prompt:                                       
                     nw_messages= [{"role": "assistant", "content": result["result"]}]
                     follow_up = await call_llm(nw_messages, stream_mode)
-                    return follow_up
-                    #return {"messages": messages + [{"role": "assistant", "content": follow_up}]}
-                    #follow_up = llm.chat.completions.create(
-                    #    model="qwen3:8b",
-                    #    messages=messages
-                    #)
-                    #return messages.append({"role": "assistant", "content": follow_up.choices[0].message.content})
-                    #return follow_up.choices[0].message.content
-                else:
-                    #return messages.append({"role": "assistant", "content": result["result"]})
+                    return follow_up                    
+                else:                    
                     return result["result"]
             else:
-                #return messages.append({"role": "assistant", "content": response.choices[0].message.content})
+                
                 return response.choices[0].message.content
-            #return {messages + [{"role": "assistant", "content": follow_up.choices[0].message.content}]}
-        #return response.choices[0].message.content
+           
 
 
 async def main():
@@ -210,40 +199,3 @@ if __name__ == "__main__":
     asyncio.run(main())
     
     
-"""
-        # Call Qwen to decide what to do
-        response = llm.chat.completions.create(
-            model="qwen3:8b",
-            messages=[
-                {"role": "system", "content": "You can call tools like get_weather, list_cities, add_city."},
-                *history
-            ],
-            tools=tools,            
-            tool_choice="auto"
-        )
-
-        msg = response.choices[0].message
-        if msg.tool_calls:
-            for call in msg.tool_calls:
-                tool_name = call.function.name
-                args = json.loads(call.function.arguments)
-                result = await route_tool_call(tool_name, args)
-                history.append({"role": "tool", "tool_name": tool_name, "content": result})
-                print(f"🔧 Tool: {result}")
-        else:
-            history.append({"role": "assistant", "content": msg.content})
-            print(f"🤖 Agent: {msg.content}")
-    
-    
-    follow_up = llm.chat.completions.create(
-                    model="qwen3:8b",
-                    messages=messages + [
-                        response.choices[0].message,
-                        {
-                            "role": "tool",
-                            "tool_call_id": tool_call.id,
-                            "name": function_name,
-                            "content": result
-                        }
-                ])
-                """
