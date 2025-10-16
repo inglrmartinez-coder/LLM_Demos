@@ -4,6 +4,7 @@ FastMCP HTTP Server - Weather Service
 Runs as HTTP server instead of stdio for Docker deployment
 """
 
+
 from fastmcp import FastMCP
 import json
 
@@ -24,11 +25,6 @@ def get_weather_prompt(city: str) -> dict:
     print(f"Generating prompt for city: {city}")
     return f"What is the weather in {city}?"
 
-#not used    
-#return {
-#    "role": "user",
-#    "content": f"What is the weather in {city}?"
-#}
     
 @mcp.tool()
 def get_weather(city: str) -> str:
