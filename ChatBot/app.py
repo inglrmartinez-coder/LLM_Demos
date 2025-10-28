@@ -12,8 +12,12 @@ google_api_key= os.getenv("GOOGLE_API_KEY")
 openai = OpenAI()
 MODEL = 'gpt-4o-mini' #lets use OpenAI
 
+#system prompt for the chat
 system_promp="you are a very useful assistant"
 
+
+#using this structure works for the chatinterface function 
+# for the gradio interface
 def chat(message,history):
     messages = [{"role":"system","content":system_promp}] + \
     history + [{"role":"user","content":message}]
